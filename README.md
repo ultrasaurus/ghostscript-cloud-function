@@ -1,15 +1,18 @@
 # Cloud Function using Ghostscript
 
-This is an example of a Google Cloud Function using Ghostscript based on 
-the idea that node modules can install native code that is in the same directory
-as the Cloud Function's source code.
+This is an example of a Google Cloud Function using Ghostscript, exploring how
+to answer a [question from StackOverflow](https://stackoverflow.com/questions/43242998/cloud-functions-for-firebase-converting-pdf-to-image)
+
+I don't know if this approach is a good idea, rather it was an experiment in 
+learning more about the experience of using Cloud Storage events to trigger 
+Cloud Functions with the Firebase development experience.
+
+This solution is based on the idea that node modules can install native code 
+that is in the same directory as the Cloud Function's source code, using a 
+similar solution created by 
 
 * Node library that wraps Ghostscript command line: https://github.com/sina-masnadi/node-gs
 * Compiled Ghostscript which is used via git submodule: https://github.com/sina-masnadi/lambda-ghostscript
-
-I don't know if this a good idea, rather it was an experiment in learning more
-about the experience of using Cloud Storage events to trigger Cloud Functions
-with the Firebase development experience.
 
 To use this in your own project, the following steps should work.  I haven't
 tested them, so if anyone is reading this, and it works, please do a PR and
