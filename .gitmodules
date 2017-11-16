@@ -1,0 +1,3 @@
+[submodule "path_to_submodule"]
+  path = functions/lambda-ghostscript
+  url = https://github.com/sina-masnadi/lambda-ghostscript.git
