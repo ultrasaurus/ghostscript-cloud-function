@@ -6,15 +6,7 @@ const os = require('os');
 const fs = require('fs');
 var   gs = require('gs');
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
-
-exports.doSomething = functions.storage.object().onChange(event => {
-  console.log('doSomething', event);
+exports.makePNG = functions.storage.object().onChange(event => {
 
   // ignore delete events
   if (event.data.resourceState == 'not_exists') return false;
@@ -74,8 +66,5 @@ exports.doSomething = functions.storage.object().onChange(event => {
     console.log('exception:', err);
     return err;
   });
-
-
-
 
 });
