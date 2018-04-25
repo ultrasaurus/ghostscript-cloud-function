@@ -1,18 +1,12 @@
 const functions = require('firebase-functions');
 const gcs = require('@google-cloud/storage')();
-const spawn = require('child-process-promise').spawn;
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-var   gs = require('gs');
+var gs = require('gs');
 
-exports.makePNG = functions.storage.object().onChange(event => {
-
-  // ignore delete events
-  if (event.data.resourceState == 'not_exists') return false;
-
-  const filePath = event.data.name;
-  const fileDir = path.dirname(filePath);
+exports.makePNG = functions.storage.object().onFinalize((object) => {
+  const filePath = object.name;
   const fileName = path.basename(filePath);
   const tempFilePath = path.join(os.tmpdir(), fileName);
   if (fileName.endsWith('.png')) return false;
@@ -20,39 +14,37 @@ exports.makePNG = functions.storage.object().onChange(event => {
 
   const newName = path.basename(filePath, '.pdf') + '.png';
   const tempNewPath = path.join(os.tmpdir(), newName);
-  
 
-  // // Download file from bucket.
-  const bucket = gcs.bucket(event.data.bucket);
+  const bucket = gcs.bucket(object.bucket);
 
+  // Download file from bucket.
   return bucket.file(filePath).download({
     destination: tempFilePath
   }).then(() => {
     console.log('Image downloaded locally to', tempFilePath);
 
     return new Promise(function (resolve, reject) {
-        gs()
-          .batch()
-          .nopause()
-          .option('-r' + 50 * 2)
-          .option('-dDownScaleFactor=2')
-          .executablePath('lambda-ghostscript/bin/./gs')
-          .device('png16m')
-          .output(tempNewPath)
-          .input(tempFilePath)
-          .exec(function (err, stdout, stderr) {
-              if (!err) {
-                console.log('gs executed w/o error');            
-                console.log('stdout',stdout);            
-                console.log('stderr',stderr);            
-                resolve();
-              } else {
-                console.log('gs error:', err);
-                reject(err);
-              }
-          });
+      gs()
+        .batch()
+        .nopause()
+        .option('-r' + 50 * 2)
+        .option('-dDownScaleFactor=2')
+        .executablePath('lambda-ghostscript/bin/./gs')
+        .device('png16m')
+        .output(tempNewPath)
+        .input(tempFilePath)
+        .exec(function (err, stdout, stderr) {
+          if (!err) {
+            console.log('gs executed w/o error');
+            console.log('stdout', stdout);
+            console.log('stderr', stderr);
+            resolve();
+          } else {
+            console.log('gs error:', err);
+            reject(err);
+          }
+        });
     });
-
   }).then(() => {
     console.log('PNG created at', tempNewPath);
 
@@ -66,5 +58,4 @@ exports.makePNG = functions.storage.object().onChange(event => {
     console.log('exception:', err);
     return err;
   });
-
 });
